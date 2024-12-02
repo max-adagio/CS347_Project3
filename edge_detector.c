@@ -126,9 +126,17 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
         fclose(file);
         exit(EXIT_FAILURE);
     }
+    
 
     PPMPixel *img;
-    
+
+    // skip comments in the header 
+    // DELETE THIS IF UNNECESSARY
+    char c;
+    while ((c = fgetc(file)) == '#') {
+        while (fgetc(file) != '\n');
+    }
+    ungetc(c, file);
 
     return img;
 }
@@ -172,7 +180,7 @@ int main(int argc, char *argv[])
             printf("Pixel %d: R=%u G=%u B=%u\n", i, image[i].r, image[i].g, image[i].b);
         }
         free (image);
-        }
+        
         
     } else {
         printf("Failure\n");
