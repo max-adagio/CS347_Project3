@@ -153,7 +153,7 @@ void *manage_image_file(void *args){
 int main(int argc, char *argv[])
 {
     if (argc != 2) {
-        fprintf(stderr, "Usage: ./edge_detector %s[s]", filename);
+        fprintf(stderr, "Usage: ./edge_detector %s[s]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -165,6 +165,15 @@ int main(int argc, char *argv[])
 
     if (image) {
         printf("Success\n");
+        printf("Width: %lu, Height: %lu\n", width, height);
+
+        printf("First few pixels (RGB values):\n");
+        for (int i = 0; i < 10 && i < width * height; i++) {
+            printf("Pixel %d: R=%u G=%u B=%u\n", i, image[i].r, image[i].g, image[i].b);
+        }
+        free (image);
+        }
+        
     } else {
         printf("Failure\n");
     }
