@@ -109,6 +109,18 @@ void write_image(PPMPixel *image, char *filename, unsigned long int width, unsig
  */
 PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned long int *height)
 {
+    FILE *file = fopen(filename, "rb");
+    if (!file) { // error check
+        fprintf(stderr, "Usage: ./edge_detector %s[s]", filename);
+        exit(EXIT_FAILURE);
+    }
+
+    char format[3];
+    if (!fgets(format, sizeof(format), file)) { // grab header and put into format array
+        fprintf(stderr, "Usage: ./edge_detector %s[s]", filename);]
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
 
     PPMPixel *img;
     
@@ -135,7 +147,7 @@ void *manage_image_file(void *args){
  */
 int main(int argc, char *argv[])
 {
-   
+
 
     
     return 0;
