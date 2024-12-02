@@ -1,0 +1,71 @@
+CSCI-347 Learning Reflection
+
+Name:
+
+================================================================
+1. What are some of the most important lessons you learned while working on this assignment? Why do you think so?
+
+
+
+
+
+
+
+
+
+
+
+==========================================================================
+2. What do you want to learn more about, and why?
+
+
+
+
+
+
+
+
+
+
+
+==========================================================================
+3. What were some of your most challenging/powerful moments and what made them so?
+
+
+
+
+
+
+
+
+
+
+
+
+===============================================================================
+4. What did you learn were your greatest strengths? Your biggest areas for improvement?
+
+
+
+
+
+
+
+
+
+
+
+===============================================================================
+5. Reread the learning objectives (LOs) of the assignment. State them below and rate your confidence about them on a scale from 1 to 5, where 1 is Not Confident at all, and 5 is Very Confident. 
+Example: LO1: Demonstrate how to write clean and readable code in C. (Confidence level: 4)
+
+
+
+
+
+
+
+
+
+
+
