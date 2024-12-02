@@ -153,7 +153,21 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
 
     // skip to the pixel data
     fgetc(file);
-    
+    PPMPixel *img = (PPMPixel *)malloc((*width) * (*height) * sizeof(PPMPixel));
+    if (!img) {
+        fprintf(stderr, "Error: Unable to allocate memory for image\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    // actually reading the pixel data finally!
+    if (fread(img, sizeof(PPMPixel), (*width) * (*height), file) != (*width) * (*height)) {
+        fprintf(stderr, "Error: unable to read pixel data\n");
+        free(img);
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+    fclose(file);
     return img;
 }
 
