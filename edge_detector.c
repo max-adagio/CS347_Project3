@@ -138,6 +138,22 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
     }
     ungetc(c, file);
 
+    if (fscanf(file, "%lu %lu", width, height) != 2) {
+        fprintf(stderr, "Error: Invalid image size (width, height)\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    int max_val;
+    if (fscanf(file, "%d", &max_val) != 1 || max_val != RGB_COMPONENT_COLOR) {
+        fprintf(stderr, "Error: Invalid max color value (must be 255)\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    // skip to the pixel data
+    fgetc(file);
+    
     return img;
 }
 
