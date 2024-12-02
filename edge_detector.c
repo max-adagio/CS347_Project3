@@ -117,7 +117,12 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
 
     char format[3];
     if (!fgets(format, sizeof(format), file)) { // grab header and put into format array
-        fprintf(stderr, "Usage: ./edge_detector %s[s]", filename);]
+        fprintf(stderr, "HEADER WRONG ... Usage: ./edge_detector %s[s]", filename);
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+    if (strncmp(format, "P6", 2) != 0) {
+        fprintf(stderr, "NOT P6 ... Usage: ./edge_detector %s[s]", filename);
         fclose(file);
         exit(EXIT_FAILURE);
     }
