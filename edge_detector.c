@@ -152,7 +152,22 @@ void *manage_image_file(void *args){
  */
 int main(int argc, char *argv[])
 {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: ./edge_detector %s[s]", filename);
+        return EXIT_FAILURE;
+    }
 
+    const char *filename = argv[1];
+    unsigned long int width, height;
+
+    printf("reading image: %s\n", filename);
+    PPMPixel *image = read_image(filename, &width, &height);
+
+    if (image) {
+        printf("Success\n");
+    } else {
+        printf("Failure\n");
+    }
 
     
     return 0;
