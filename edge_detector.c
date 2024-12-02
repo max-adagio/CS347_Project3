@@ -109,34 +109,45 @@ void write_image(PPMPixel *image, char *filename, unsigned long int width, unsig
  */
 PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned long int *height)
 {
-    FILE *file = fopen(filename, "rb");
-    if (!file) { // error check
-        fprintf(stderr, "Usage: ./edge_detector %s[s]", filename);
+FILE *file = fopen(filename, "rb");
+    if (!file) {
+        fprintf(stderr, "Error: Cannot open file %s\n", filename);
         exit(EXIT_FAILURE);
     }
 
+    // Read the PPM format
     char format[3];
-    if (!fgets(format, sizeof(format), file)) { // grab header and put into format array
-        fprintf(stderr, "HEADER WRONG ... Usage: ./edge_detector %s[s]", filename);
+    if (!fgets(format, sizeof(format), file)) {
+        fprintf(stderr, "Error: Unable to read the image format\n");
         fclose(file);
         exit(EXIT_FAILURE);
     }
-    if (strncmp(format, "P6", 2) != 0) {
-        fprintf(stderr, "NOT P6 ... Usage: ./edge_detector %s[s]", filename);
-        fclose(file);
-        exit(EXIT_FAILURE);
-    }
-    
 
-    PPMPixel *img;
+    if (strncmp(format, "P6", 2) != 0) {
+        fprintf(stderr, "Error: Invalid image format (must be P6)\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
 
     // skip comments in the header 
     // DELETE THIS IF UNNECESSARY
+    fgetc(file);
     char c;
-    while ((c = fgetc(file)) == '#') {
-        while (fgetc(file) != '\n');
+    while ((c = fgetc(file)) != EOF) {
+        if (c == '#') {
+            printf("Found a comment starting with '#':\n");
+
+            // Skip the rest of the comment line
+            while ((c = fgetc(file)) != '\n' && c != EOF){
+                printf("%c", c);
+            }
+        } else {
+            // Put the character back and stop processing comments
+            ungetc(c, file);
+            break;
+        }
     }
-    ungetc(c, file);
 
     if (fscanf(file, "%lu %lu", width, height) != 2) {
         fprintf(stderr, "Error: Invalid image size (width, height)\n");
@@ -151,7 +162,7 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
         exit(EXIT_FAILURE);
     }
 
-    // skip to the pixel data
+    // Skip single whitespace character after max color value
     fgetc(file);
     PPMPixel *img = (PPMPixel *)malloc((*width) * (*height) * sizeof(PPMPixel));
     if (!img) {
