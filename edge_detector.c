@@ -72,8 +72,54 @@ void *compute_laplacian_threadfn(void *params)
 PPMPixel *apply_filters(PPMPixel *image, unsigned long w, unsigned long h, double *elapsedTime) {
 
     PPMPixel *result;
-   
+    result = (PPMPixel *)malloc(w * h *sizeof(PPMPixel));
+    if (!result) {  // error check
+        fprintf(stderr, "Error: Unable to allocate memory for the result image\n");
+        exit(EXIT_FAILURE);
+    }
 
+    pthread_t threads[LAPLACIAN_THREADS];
+    struct parameter params[LAPLACIAN_THREADS];
+
+    // calculating the work to be performed per thread
+    unsigned long int total_pixels = w * h;
+    unsigned long int work_per_thread = total_pixels / LAPLACIAN_THREADS;
+    unsigned long int remaining_work = total_pixels % LAPLACIAN_THREADS;    // what does not divide evenly
+
+    struct timeval start_time, end_time;
+    gettimeofday(&start_time, NULL);
+
+    // Create threads
+    for (int i = 0; i < LAPLACIAN_THREADS; i++) {
+        params[i].image = image;
+        params[i].result = result;
+        params[i].w = w;
+        params[i].h = h;
+        params[i].start = i * work_per_thread;
+        params[i].size = (i == LAPLACIAN_THREADS - 1) ? 
+                         (work_per_thread + remaining_work) : work_per_thread;
+
+        if (pthread_create(&threads[i], NULL, compute_laplacian_threadfn, &params[i]) != 0) {
+            fprintf(stderr, "Error: Unable to create thread %d\n", i);
+            free(result);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // Join threads
+    for (int i = 0; i < LAPLACIAN_THREADS; i++) {
+        if (pthread_join(threads[i], NULL) != 0) {
+            fprintf(stderr, "Error: Unable to join thread %d\n", i);
+            free(result);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    gettimeofday(&end_time, NULL);
+
+    // Calculate elapsed time
+    *elapsedTime = (end_time.tv_sec - start_time.tv_sec) +
+                   (end_time.tv_usec - start_time.tv_usec) / 1e6;
 
     return result;
 }
