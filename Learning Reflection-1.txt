@@ -1,43 +1,27 @@
 CSCI-347 Learning Reflection
 
-Name:
+Name: Max Widjaja
 
 ================================================================
 1. What are some of the most important lessons you learned while working on this assignment? Why do you think so?
 
 
-
-
-
-
-
-
-
+The most important lesson I learned while working on this assignment was the "order to program in". I've come to found that everyone has their own preferred order for programming a complex program, which is based on their personal understanding of the requirements. For Project 3, I started by work in a chronological order, starting from the user's input, all the way to the user's output with a few exceptions. Working this way also allowed me to easily test my work-in-progress 
 
 
 ==========================================================================
 2. What do you want to learn more about, and why?
 
-
-
-
-
-
-
-
-
+I want to learn more about this kind of edge detection's use in photography. I also know that camera processing units are much less powerful computers, but their ability to apply edge detection to what it sees rapidly enough to judge how to focus the camera is quite the feat. I'm sure this would require the programming to be very lean and efficient. This is fascinating to me, and it also plays into the subject matter of my major, Electrical Engineering.
 
 
 ==========================================================================
 3. What were some of your most challenging/powerful moments and what made them so?
 
 
+Honestly, I struggled with the structure of the program. It took me a long while to understand what each function was intended for, and it slowed down my understanding of the requirements a lot. I think this is in part due to several of the functions being void, and taking parameters as a pointer. When I finally sorted out what each function was intended to do, it went better from there.
 
-
-
-
-
-
+I also know that in the workforce, it is likely that similar scenarios to a greater extreme will take place. Working on an outline, or half-finished/in-progress code is a given, and understanding the structure of a program at a glance is important.
 
 
 
@@ -45,12 +29,9 @@ Name:
 ===============================================================================
 4. What did you learn were your greatest strengths? Your biggest areas for improvement?
 
+I feel as if I'm pretty good at absorbing from examples for similar work. I was able to extract most of my understanding of threads from going through the class examples, and also other examples I sourced from online. 
 
-
-
-
-
-
+I need to work on my bash programming. I know it's simple, but right now I am succeeding by googling, not by knowing. I know this is because of low experience. I am glad to have gained some bash experience in 347.
 
 
 
@@ -60,7 +41,18 @@ Name:
 Example: LO1: Demonstrate how to write clean and readable code in C. (Confidence level: 4)
 
 
-
+1. Construct a multithreaded program using POSIX threads.
+	4
+2. Demonstrate how to read and write binary files.
+	3
+3. Employ efficient synchronization mechanisms.
+	3
+4. Examine race conditions using Helgrind, and memory errors using Valgrind.
+	3
+5. Apply C programming best practices (see the code review checklist Download code review checklist).
+	4
+6. Recognize the effect of number of threads on the program's performance. 
+	4
 
 
 
