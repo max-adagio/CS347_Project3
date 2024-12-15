@@ -31,8 +31,6 @@ struct file_name_args {
     char *input_file_name;      //e.g., file1.ppm
     char output_file_name[20];  //will take the form laplaciani.ppm, e.g., laplacian1.ppm
 };
-
-
 /*The total_elapsed_time is the total time taken by all threads 
 to compute the edge detection of all input images .
 */
@@ -80,9 +78,9 @@ void *compute_laplacian_threadfn(void *params) {
         }
 
         // Clamp values to the range [0, 255]
-        p->result[y * p->w + x].r = (unsigned char) fmax(0, fmin(255, red));
-        p->result[y * p->w + x].g = (unsigned char) fmax(0, fmin(255, green));
-        p->result[y * p->w + x].b = (unsigned char) fmax(0, fmin(255, blue));
+        p->result[y * p->w + x].r = (unsigned char) fmax(0, fmin(RGB_COMPONENT_COLOR, red));
+        p->result[y * p->w + x].g = (unsigned char) fmax(0, fmin(RGB_COMPONENT_COLOR, green));
+        p->result[y * p->w + x].b = (unsigned char) fmax(0, fmin(RGB_COMPONENT_COLOR, blue));
     }
 
     return NULL;
@@ -94,14 +92,16 @@ void *compute_laplacian_threadfn(void *params) {
  Return: result (filtered image)
  */
 PPMPixel *apply_filters(PPMPixel *image, unsigned long w, unsigned long h, double *elapsedTime) {
-
+    // instantiate and initialize result array of pixels
     PPMPixel *result;
     result = (PPMPixel *)malloc(w * h *sizeof(PPMPixel));
+
     if (!result) {  // error check
         fprintf(stderr, "Error: Unable to allocate memory for the result image\n");
         exit(EXIT_FAILURE);
     }
 
+    // instantiate threads array
     pthread_t threads[LAPLACIAN_THREADS];
     struct parameter params[LAPLACIAN_THREADS];
 
@@ -123,6 +123,7 @@ PPMPixel *apply_filters(PPMPixel *image, unsigned long w, unsigned long h, doubl
         params[i].size = (i == LAPLACIAN_THREADS - 1) ? 
                          (work_per_thread + remaining_work) : work_per_thread;
 
+        // creates threads
         if (pthread_create(&threads[i], NULL, compute_laplacian_threadfn, &params[i]) != 0) {
             fprintf(stderr, "Error: Unable to create thread %d\n", i);
             free(result);
@@ -130,9 +131,9 @@ PPMPixel *apply_filters(PPMPixel *image, unsigned long w, unsigned long h, doubl
         }
     }
 
-    // Join threads
+    // join threads to wait for all threads to finish work
     for (int i = 0; i < LAPLACIAN_THREADS; i++) {
-        if (pthread_join(threads[i], NULL) != 0) {
+        if (pthread_join(threads[i], NULL) != 0) {  // call in error catch
             fprintf(stderr, "Error: Unable to join thread %d\n", i);
             free(result);
             exit(EXIT_FAILURE);
