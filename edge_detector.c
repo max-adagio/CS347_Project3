@@ -87,8 +87,17 @@ PPMPixel *apply_filters(PPMPixel *image, unsigned long w, unsigned long h, doubl
  */
 void write_image(PPMPixel *image, char *filename, unsigned long int width, unsigned long int height)
 {
-
-    
+    FILE *newfile = fopen(filename, "wb");
+    char format[3];
+    fprintf(newfile, "P6\n");
+    fprintf(newfile, "%lu %lu\n", width, height);
+    fprintf(newfile, "%d\n", RGB_COMPONENT_COLOR);
+    size_t pixel_count = width * height;
+    if (fwrite(image, sizeof(PPMPixel), pixel_count, newfile) != pixel_count) {
+        fprintf(stderr, "Error: Unable to write pixel data to file %s\n", filename);
+    }
+    fclose(newfile);
+    printf("image successfully written\n");
 }
 
 
@@ -109,7 +118,7 @@ void write_image(PPMPixel *image, char *filename, unsigned long int width, unsig
  */
 PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned long int *height)
 {
-FILE *file = fopen(filename, "rb");
+    FILE *file = fopen(filename, "rb");
     if (!file) {
         fprintf(stderr, "Error: Cannot open file %s\n", filename);
         exit(EXIT_FAILURE);
@@ -192,7 +201,7 @@ FILE *file = fopen(filename, "rb");
 */
 void *manage_image_file(void *args){
  
-    
+
 }
 /*The driver of the program. Check for the correct number of arguments. If wrong print the message: "Usage ./a.out filename[s]"
   It shall accept n filenames as arguments, separated by whitespace, e.g., ./a.out file1.ppm file2.ppm    file3.ppm
@@ -220,6 +229,9 @@ int main(int argc, char *argv[])
         for (int i = 0; i < 10 && i < width * height; i++) {
             printf("Pixel %d: R=%u G=%u B=%u\n", i, image[i].r, image[i].g, image[i].b);
         }
+        write_image(image, "laplacian.ppm", width, height);
+
+
         free (image);
         
         
