@@ -1,3 +1,9 @@
+/*  CSCI 347
+ *  Project 3 - "Edge Detector"
+ *  Max Widjaja
+ *  2 December 2024
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -163,15 +169,15 @@ void write_image(PPMPixel *image, char *filename, unsigned long int width, unsig
     fprintf(newfile, "P6\n");
     fprintf(newfile, "%lu %lu\n", width, height);
     fprintf(newfile, "%d\n", RGB_COMPONENT_COLOR);
+
     size_t pixel_count = width * height;
+    
     if (fwrite(image, sizeof(PPMPixel), pixel_count, newfile) != pixel_count) {
         fprintf(stderr, "Error: Unable to write pixel data to file %s\n", filename);
     }
     fclose(newfile);
-    printf("image successfully written\n");
+    printf("Image successfully written.\n");
 }
-
-
 
 /* Open the filename image for reading, and parse it.
     Example of a ppm header:    //http://netpbm.sourceforge.net/doc/ppm.html
@@ -209,19 +215,17 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
         exit(EXIT_FAILURE);
     }
 
-
     // skip comments in the header 
     // DELETE THIS IF UNNECESSARY
     fgetc(file);
     char c;
     while ((c = fgetc(file)) != EOF) {
         if (c == '#') {
-            printf("Found a comment starting with '#':\n");
-
             // Skip the rest of the comment line
             while ((c = fgetc(file)) != '\n' && c != EOF){
-                printf("%c", c);
+                // printf("%c", c);
             }
+            
         } else {
             // Put the character back and stop processing comments
             ungetc(c, file);
@@ -279,7 +283,6 @@ void *manage_image_file(void *args){
     double elapsedTime;
 
     // Read the input image
-    printf("Reading image: %s\n", input_file_name);
     PPMPixel *image = read_image(input_file_name, &width, &height);
 
     if (!image) {
@@ -287,7 +290,7 @@ void *manage_image_file(void *args){
         return NULL;
     }
 
-    printf("Image read successfully. Width: %lu, Height: %lu\n", width, height);
+    // printf("Image read successfully. Width: %lu, Height: %lu\n", width, height);
 
     // Apply the Laplacian filter
     PPMPixel *result = apply_filters(image, width, height, &elapsedTime);
@@ -299,7 +302,7 @@ void *manage_image_file(void *args){
     pthread_mutex_unlock(&mutex);
 
     // Write the filtered image to the output file
-    printf("Writing filtered image to %s\n", output_file_name);
+    // printf("Writing filtered image to %s\n", output_file_name);
     write_image(result, output_file_name, width, height);
 
     // Free allocated memory
@@ -309,6 +312,8 @@ void *manage_image_file(void *args){
     return NULL;
 
 }
+
+
 /*The driver of the program. Check for the correct number of arguments. If wrong print the message: "Usage ./a.out filename[s]"
   It shall accept n filenames as arguments, separated by whitespace, e.g., ./a.out file1.ppm file2.ppm    file3.ppm
   It will create a thread for each input file to manage.  
