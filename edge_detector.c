@@ -246,7 +246,42 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
 
 */
 void *manage_image_file(void *args){
-    
+    struct file_name_args *file_args = (struct file_name_args *)args;
+    char *input_file_name = file_args->input_file_name;
+    char *output_file_name = file_args->output_file_name;
+
+    unsigned long int width, height;
+    double elapsedTime;
+
+    // Read the input image
+    printf("Reading image: %s\n", input_file_name);
+    PPMPixel *image = read_image(input_file_name, &width, &height);
+
+    if (!image) {
+        fprintf(stderr, "Error: Failed to read image %s\n", input_file_name);
+        return NULL;
+    }
+
+    printf("Image read successfully. Width: %lu, Height: %lu\n", width, height);
+
+    // Apply the Laplacian filter
+    PPMPixel *result = apply_filters(image, width, height, &elapsedTime);
+
+    // Update the global elapsed time (critical section)
+    pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&mutex);
+    total_elapsed_time += elapsedTime;
+    pthread_mutex_unlock(&mutex);
+
+    // Write the filtered image to the output file
+    printf("Writing filtered image to %s\n", output_file_name);
+    write_image(result, output_file_name, width, height);
+
+    // Free allocated memory
+    free(image);
+    free(result);
+
+    return NULL;
 
 }
 /*The driver of the program. Check for the correct number of arguments. If wrong print the message: "Usage ./a.out filename[s]"
@@ -256,36 +291,37 @@ void *manage_image_file(void *args){
  */
 int main(int argc, char *argv[])
 {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: ./edge_detector %s[s]\n", argv[0]);
+    if (argc < 2) {
+        fprintf(stderr, "Usage: ./edge_detector filename[s]\n");
         return EXIT_FAILURE;
     }
 
-    const char *filename = argv[1];
-    unsigned long int width, height;
+    int num_files = argc - 1;   // decrement the first arg 
+    pthread_t threads[num_files];   
+    struct file_name_args file_args[num_files];
 
-    printf("reading image: %s\n", filename);
-    PPMPixel *image = read_image(filename, &width, &height);
+    // Create threads for each file
+    for (int i = 0; i < num_files; i++) {
+        file_args[i].input_file_name = argv[i + 1];
+        snprintf(file_args[i].output_file_name, sizeof(file_args[i].output_file_name), "laplacian%d.ppm", i + 1);
 
-    if (image) {
-        printf("Success\n");
-        printf("Width: %lu, Height: %lu\n", width, height);
-
-        printf("First few pixels (RGB values):\n");
-        for (int i = 0; i < 10 && i < width * height; i++) {
-            printf("Pixel %d: R=%u G=%u B=%u\n", i, image[i].r, image[i].g, image[i].b);
+        if (pthread_create(&threads[i], NULL, manage_image_file, &file_args[i]) != 0) {
+            fprintf(stderr, "Error: Unable to create thread for file %s\n", argv[i + 1]);
+            return EXIT_FAILURE;
         }
-        write_image(image, "laplacian.ppm", width, height);
-
-
-        free (image);
-        
-        
-    } else {
-        printf("Failure\n");
     }
 
-    
-    return 0;
+    // Wait for all threads to complete
+    for (int i = 0; i < num_files; i++) {
+        if (pthread_join(threads[i], NULL) != 0) {
+            fprintf(stderr, "Error: Unable to join thread for file %s\n", argv[i + 1]);
+            return EXIT_FAILURE;
+        }
+    }
+
+    // Print total elapsed time
+    printf("Total elapsed time: %.4f s\n", total_elapsed_time);
+
+    return EXIT_SUCCESS;
 }
 
