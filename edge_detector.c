@@ -46,9 +46,10 @@ double total_elapsed_time = 0;
     The results are summed together to yield a single output value that is placed in the output image at the location of the pixel being processed on the input.
  
  */
-void *compute_laplacian_threadfn(void *params)
-{
-    
+
+void *compute_laplacian_threadfn(void *params) {
+    struct parameter *p = (struct parameter *)params;
+
     int laplacian[FILTER_WIDTH][FILTER_HEIGHT] =
     {
         {-1, -1, -1},
@@ -56,11 +57,34 @@ void *compute_laplacian_threadfn(void *params)
         {-1, -1, -1}
     };
 
-    int red, green, blue;
-     
-      
-      
-        
+    for (unsigned long int i = p->start; i < p->start + p->size; i++) {
+        unsigned long int x = i % p->w;  // column index
+        unsigned long int y = i / p->w;  // row index
+
+        int red = 0, green = 0, blue = 0;
+
+        // Apply the filter
+        for (int fy = 0; fy < FILTER_HEIGHT; fy++) {
+            for (int fx = 0; fx < FILTER_WIDTH; fx++) {
+                int nx = x + fx - 1;
+                int ny = y + fy - 1;
+
+                // Boundary check
+                if (nx >= 0 && nx < p->w && ny >= 0 && ny < p->h) {
+                    PPMPixel *neighbor = &p->image[ny * p->w + nx];
+                    red   += neighbor->r * laplacian[fy][fx];
+                    green += neighbor->g * laplacian[fy][fx];
+                    blue  += neighbor->b * laplacian[fy][fx];
+                }
+            }
+        }
+
+        // Clamp values to the range [0, 255]
+        p->result[y * p->w + x].r = (unsigned char) fmax(0, fmin(255, red));
+        p->result[y * p->w + x].g = (unsigned char) fmax(0, fmin(255, green));
+        p->result[y * p->w + x].b = (unsigned char) fmax(0, fmin(255, blue));
+    }
+
     return NULL;
 }
 
