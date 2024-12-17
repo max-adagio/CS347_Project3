@@ -20,7 +20,7 @@
 #define RGB_COMPONENT_COLOR 255
 
 typedef struct {
-      unsigned char r, g, b;
+    unsigned char r, g, b;
 } PPMPixel;
 
 struct parameter {
@@ -37,6 +37,7 @@ struct file_name_args {
     char *input_file_name;      //e.g., file1.ppm
     char output_file_name[20];  //will take the form laplaciani.ppm, e.g., laplacian1.ppm
 };
+
 /*The total_elapsed_time is the total time taken by all threads 
 to compute the edge detection of all input images .
 */
@@ -193,8 +194,7 @@ void write_image(PPMPixel *image, char *filename, unsigned long int width, unsig
  Check the rgb component, if not 255, display error message.
  Return: pointer to PPMPixel that has the pixel data of the input image (filename).The pixel data is stored in scanline order from left to right (up to bottom) in 3-byte chunks (r g b values for each pixel) encoded as binary numbers.
  */
-PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned long int *height)
-{
+PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned long int *height) {
     FILE *file = fopen(filename, "rb");
     if (!file) {
         fprintf(stderr, "Error: Cannot open file %s\n", filename);
@@ -274,7 +274,7 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
  Example: the result image of the file passed third during the input shall be called "laplacian3.ppm".
 
 */
-void *manage_image_file(void *args){
+void *manage_image_file(void *args) {
     struct file_name_args *file_args = (struct file_name_args *)args;
     char *input_file_name = file_args->input_file_name;
     char *output_file_name = file_args->output_file_name;
