@@ -94,11 +94,6 @@ void *compute_laplacian_threadfn(void *params) {
     return NULL;
 }
 
-/* Apply the Laplacian filter to an image using threads.
- Each thread shall do an equal share of the work, i.e. work=height/number of threads. If the size is not even, the last thread shall take the rest of the work.
- Compute the elapsed time and store it in *elapsedTime (Read about gettimeofday).
- Return: result (filtered image)
- */
 PPMPixel *apply_filters(PPMPixel *image, unsigned long w, unsigned long h, double *elapsedTime) {
     // instantiate and initialize result array of pixels
     PPMPixel *result;
@@ -158,15 +153,7 @@ PPMPixel *apply_filters(PPMPixel *image, unsigned long w, unsigned long h, doubl
     return result;
 }
 
-/*Create a new P6 file to save the filtered image in. Write the header block
- e.g. P6
-      Width Height
-      Max color value
- then write the image data.
- The name of the new file shall be "filename" (the second argument).
- */
-void write_image(PPMPixel *image, char *filename, unsigned long int width, unsigned long int height)
-{
+void write_image(PPMPixel *image, char *filename, unsigned long int width, unsigned long int height) {
     FILE *newfile = fopen(filename, "wb");
     char format[3];
     fprintf(newfile, "P6\n");
@@ -182,20 +169,6 @@ void write_image(PPMPixel *image, char *filename, unsigned long int width, unsig
     printf("Image successfully written.\n");
 }
 
-/* Open the filename image for reading, and parse it.
-    Example of a ppm header:    //http://netpbm.sourceforge.net/doc/ppm.html
-    P6                  -- image format
-    # comment           -- comment lines begin with
-    ## another comment  -- any number of comment lines
-    200 300             -- image width & height 
-    255                 -- max color value
- 
- Check if the image format is P6. If not, print invalid format error message.
- If there are comments in the file, skip them. You may assume that comments exist only in the header block.
- Read the image size information and store them in width and height.
- Check the rgb component, if not 255, display error message.
- Return: pointer to PPMPixel that has the pixel data of the input image (filename).The pixel data is stored in scanline order from left to right (up to bottom) in 3-byte chunks (r g b values for each pixel) encoded as binary numbers.
- */
 PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned long int *height) {
     FILE *file = fopen(filename, "rb");
     if (!file) {
@@ -218,14 +191,12 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
     }
 
     // skip comments in the header 
-    // DELETE THIS IF UNNECESSARY
     fgetc(file);
     char c;
     while ((c = fgetc(file)) != EOF) {
         if (c == '#') {
             // Skip the rest of the comment line
             while ((c = fgetc(file)) != '\n' && c != EOF){
-                // printf("%c", c);
             }
             
         } else {
@@ -268,14 +239,6 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
     return img;
 }
 
-/* The thread function that manages an image file. 
- Read an image file that is passed as an argument at runtime. 
- Apply the Laplacian filter. 
- Update the value of total_elapsed_time.
- Save the result image in a file called laplaciani.ppm, where i is the image file order in the passed arguments.
- Example: the result image of the file passed third during the input shall be called "laplacian3.ppm".
-
-*/
 void *manage_image_file(void *args) {
     struct file_name_args *file_args = (struct file_name_args *)args;
 
@@ -314,12 +277,6 @@ void *manage_image_file(void *args) {
     return NULL;
 }
 
-
-/*The driver of the program. Check for the correct number of arguments. If wrong print the message: "Usage ./a.out filename[s]"
-  It shall accept n filenames as arguments, separated by whitespace, e.g., ./a.out file1.ppm file2.ppm    file3.ppm
-  It will create a thread for each input file to manage.  
-  It will print the total elapsed time in .4 precision seconds(e.g., 0.1234 s). 
- */
 int main(int argc, char *argv[]) {
     int num_threads = argc - 1;
     pthread_t arr_threads[num_threads];
