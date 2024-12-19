@@ -290,8 +290,6 @@ void *manage_image_file(void *args) {
         return NULL;
     }
 
-    // printf("Image read successfully. Width: %lu, Height: %lu\n", width, height);
-
     // Apply the Laplacian filter
     PPMPixel *result = apply_filters(image, width, height, &elapsedTime);
 
@@ -308,9 +306,9 @@ void *manage_image_file(void *args) {
     // Free allocated memory
     free(image);
     free(result);
+    pthread_mutex_destroy(&mutex);
 
     return NULL;
-
 }
 
 
