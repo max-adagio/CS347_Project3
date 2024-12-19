@@ -319,19 +319,21 @@ void *manage_image_file(void *args) {
   It will print the total elapsed time in .4 precision seconds(e.g., 0.1234 s). 
  */
 int main(int argc, char *argv[]) {
-    size_t num_threads = argc - 1;
+    int num_threads = argc - 1;
     pthread_t arr_threads[num_threads];
     struct file_name_args file_names[num_threads];
 
     for(int i = 0; i < num_threads; i++) {
-        file_names[i].input_file_name = argv[i]; // saves input filename
-        snprintf(file_names->output_file_name, 20, "laplacian%d.ppm", i + 1);
-        pthread_create(arr_threads[i], NULL, manage_image_file, &argv)  // figure this out
-    }
+        file_names[i].input_file_name = argv[i + 1]; // saves input filename
+
+        snprintf(file_names[i].output_file_name, sizeof(file_names[i].output_file_name), "laplacian%d.ppm", i + 1);
+        pthread_create(&arr_threads[i], NULL, manage_image_file, &file_names[i]);  // figure this out
+    }   
 
     for(int i = 0; i < num_threads; i++) {
         pthread_join(arr_threads[i], NULL);
     }
 
+    return EXIT_SUCCESS;
 }
 
