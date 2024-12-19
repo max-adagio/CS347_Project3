@@ -69,7 +69,7 @@ void *compute_laplacian_threadfn(void *params) {
         int green = 0; 
         int blue = 0;
 
-        // Apply the filter
+        // Applying the Laplacian filter
         for (int fy = 0; fy < FILTER_HEIGHT; fy++) {
             for (int fx = 0; fx < FILTER_WIDTH; fx++) {
                 int nx = x + fx - 1;
@@ -86,11 +86,12 @@ void *compute_laplacian_threadfn(void *params) {
         }
 
         // Clamp values to the range [0, 255]
+        // fmax() ensures the value is not 0
+        // fmin() ensures the value is clamped to 255
         p->result[y * p->w + x].r = (unsigned char) fmax(0, fmin(RGB_COMPONENT_COLOR, red));
         p->result[y * p->w + x].g = (unsigned char) fmax(0, fmin(RGB_COMPONENT_COLOR, green));
         p->result[y * p->w + x].b = (unsigned char) fmax(0, fmin(RGB_COMPONENT_COLOR, blue));
     }
-
     return NULL;
 }
 
@@ -128,7 +129,7 @@ PPMPixel *apply_filters(PPMPixel *image, unsigned long w, unsigned long h, doubl
                          (work_per_thread + remaining_work) : work_per_thread;
 
         // creates threads
-        if (pthread_create(& [i], NULL, compute_laplacian_threadfn, &params[i]) != 0) {
+        if (pthread_create(&threads[i], NULL, compute_laplacian_threadfn, &params[i]) != 0) {
             fprintf(stderr, "Error: Unable to create thread %d\n", i);
             free(result);
             exit(EXIT_FAILURE);
@@ -278,6 +279,12 @@ void *manage_image_file(void *args) {
 }
 
 int main(int argc, char *argv[]) {
+
+    if (argc < 2) {
+        fprintf(stderr, "Usage: ./edge_detector filename[s]\n");
+        return EXIT_FAILURE;
+    }
+
     int num_threads = argc - 1;
     pthread_t arr_threads[num_threads];
     struct file_name_args file_names[num_threads];
@@ -286,12 +293,21 @@ int main(int argc, char *argv[]) {
         file_names[i].input_file_name = argv[i + 1]; // saves input filename
 
         snprintf(file_names[i].output_file_name, sizeof(file_names[i].output_file_name), "laplacian%d.ppm", i + 1);
-        pthread_create(&arr_threads[i], NULL, manage_image_file, &file_names[i]);  // figure this out
+        if (pthread_create(&arr_threads[i], NULL, manage_image_file, &file_names[i]) != 0) {
+            fprintf(stderr, "Error: Unable to create thread for file %s\n", argv[i + 1]);
+            return EXIT_FAILURE;
+        }
     }   
 
     for(int i = 0; i < num_threads; i++) {
-        pthread_join(arr_threads[i], NULL);
+        if (pthread_join(arr_threads[i], NULL) != 0) {
+            fprintf(stderr, "Error: Unable to join thread for file %s\n", argv[i + 1]);
+            return EXIT_FAILURE;
+        }
     }
+
+    // Print total elapsed time
+    printf("Total elapsed time: %.4f s\n", total_elapsed_time);
 
     return EXIT_SUCCESS;
 }
