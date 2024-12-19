@@ -325,12 +325,12 @@ int main(int argc, char *argv[]) {
 
     for(int i = 0; i < num_threads; i++) {
         file_names[i].input_file_name = argv[i]; // saves input filename
-        snprintf(file_names->output_file_name, 20, "laplacian%d.ppm", i);
-        pthread_create(arr_threads[i])  // figure this out
+        snprintf(file_names->output_file_name, 20, "laplacian%d.ppm", i + 1);
+        pthread_create(arr_threads[i], NULL, manage_image_file, &argv)  // figure this out
     }
 
     for(int i = 0; i < num_threads; i++) {
-        pthread_join(arr_threads[i], )
+        pthread_join(arr_threads[i], NULL);
     }
 
 }
