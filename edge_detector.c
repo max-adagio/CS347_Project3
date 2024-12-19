@@ -55,8 +55,7 @@ double total_elapsed_time = 0;
 void *compute_laplacian_threadfn(void *params) {
     struct parameter *p = (struct parameter *)params;
 
-    int laplacian[FILTER_WIDTH][FILTER_HEIGHT] =
-    {
+    int laplacian[FILTER_WIDTH][FILTER_HEIGHT] = {
         {-1, -1, -1},
         {-1,  8, -1},
         {-1, -1, -1}
@@ -66,7 +65,9 @@ void *compute_laplacian_threadfn(void *params) {
         unsigned long int x = i % p->w;  // column index
         unsigned long int y = i / p->w;  // row index
 
-        int red = 0, green = 0, blue = 0;
+        int red = 0; 
+        int green = 0; 
+        int blue = 0;
 
         // Apply the filter
         for (int fy = 0; fy < FILTER_HEIGHT; fy++) {
@@ -110,12 +111,13 @@ PPMPixel *apply_filters(PPMPixel *image, unsigned long w, unsigned long h, doubl
 
     // instantiate threads array
     pthread_t threads[LAPLACIAN_THREADS];
-    struct parameter params[LAPLACIAN_THREADS];
+    struct parameter params[LAPLACIAN_THREADS]; // each thread gets a set of params
 
     // calculating the work to be performed per thread
     unsigned long int total_pixels = w * h;
+    // 
     unsigned long int work_per_thread = total_pixels / LAPLACIAN_THREADS;
-    unsigned long int remaining_work = total_pixels % LAPLACIAN_THREADS;    // what does not divide evenly
+    unsigned long int remaining_work = total_pixels % LAPLACIAN_THREADS;    // whatever doesn't divide evenly
 
     struct timeval start_time, end_time;
     gettimeofday(&start_time, NULL);
@@ -126,12 +128,12 @@ PPMPixel *apply_filters(PPMPixel *image, unsigned long w, unsigned long h, doubl
         params[i].result = result;
         params[i].w = w;
         params[i].h = h;
-        params[i].start = i * work_per_thread;
-        params[i].size = (i == LAPLACIAN_THREADS - 1) ? 
+        params[i].start = i * work_per_thread;  // defines index point into image array
+        params[i].size = (i == LAPLACIAN_THREADS - 1) ? /* is it the last thread? */
                          (work_per_thread + remaining_work) : work_per_thread;
 
         // creates threads
-        if (pthread_create(&threads[i], NULL, compute_laplacian_threadfn, &params[i]) != 0) {
+        if (pthread_create(& [i], NULL, compute_laplacian_threadfn, &params[i]) != 0) {
             fprintf(stderr, "Error: Unable to create thread %d\n", i);
             free(result);
             exit(EXIT_FAILURE);
