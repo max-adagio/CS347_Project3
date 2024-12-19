@@ -276,6 +276,8 @@ PPMPixel *read_image(const char *filename, unsigned long int *width, unsigned lo
 */
 void *manage_image_file(void *args) {
     struct file_name_args *file_args = (struct file_name_args *)args;
+
+    // define the input and output file names separately
     char *input_file_name = file_args->input_file_name;
     char *output_file_name = file_args->output_file_name;
 
@@ -300,7 +302,6 @@ void *manage_image_file(void *args) {
     pthread_mutex_unlock(&mutex);
 
     // Write the filtered image to the output file
-    // printf("Writing filtered image to %s\n", output_file_name);
     write_image(result, output_file_name, width, height);
 
     // Free allocated memory
@@ -317,39 +318,20 @@ void *manage_image_file(void *args) {
   It will create a thread for each input file to manage.  
   It will print the total elapsed time in .4 precision seconds(e.g., 0.1234 s). 
  */
-int main(int argc, char *argv[])
-{
-    if (argc < 2) {
-        fprintf(stderr, "Usage: ./edge_detector filename[s]\n");
-        return EXIT_FAILURE;
+int main(int argc, char *argv[]) {
+    size_t num_threads = argc - 1;
+    pthread_t arr_threads[num_threads];
+    struct file_name_args file_names[num_threads];
+
+    for(int i = 0; i < num_threads; i++) {
+        file_names[i].input_file_name = argv[i]; // saves input filename
+        snprintf(file_names->output_file_name, 20, "laplacian%d.ppm", i);
+        pthread_create(arr_threads[i])  // figure this out
     }
 
-    int num_files = argc - 1;   // decrement the first arg 
-    pthread_t threads[num_files];   
-    struct file_name_args file_args[num_files];
-
-    // Create threads for each file
-    for (int i = 0; i < num_files; i++) {
-        file_args[i].input_file_name = argv[i + 1];
-        snprintf(file_args[i].output_file_name, sizeof(file_args[i].output_file_name), "laplacian%d.ppm", i + 1);
-
-        if (pthread_create(&threads[i], NULL, manage_image_file, &file_args[i]) != 0) {
-            fprintf(stderr, "Error: Unable to create thread for file %s\n", argv[i + 1]);
-            return EXIT_FAILURE;
-        }
+    for(int i = 0; i < num_threads; i++) {
+        pthread_join(arr_threads[i], )
     }
 
-    // Wait for all threads to complete
-    for (int i = 0; i < num_files; i++) {
-        if (pthread_join(threads[i], NULL) != 0) {
-            fprintf(stderr, "Error: Unable to join thread for file %s\n", argv[i + 1]);
-            return EXIT_FAILURE;
-        }
-    }
-
-    // Print total elapsed time
-    printf("Total elapsed time: %.4f s\n", total_elapsed_time);
-
-    return EXIT_SUCCESS;
 }
 
